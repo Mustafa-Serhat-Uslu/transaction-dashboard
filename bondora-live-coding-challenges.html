@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bondora — Senior Front-End Live Coding Challenge Pack</title>
+<style>
+  :root {
+    --ink: #14203a;
+    --muted: #5a6b85;
+    --faint: #8b98ad;
+    --line: #d7deea;
+    --bg: #ffffff;
+    --panel: #f5f7fb;
+    --accent: #0a8b6f;      /* Bondora-ish teal-green */
+    --accent-dk: #076351;
+    --accent-soft: #e5f4f0;
+    --amber: #b7791f;
+    --amber-soft: #fdf3e2;
+    --red: #b4433a;
+    --code-bg: #0f1b2d;
+    --code-fg: #e7edf6;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 48px 56px;
+  }
+  h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .4em; }
+  h1 { font-size: 34px; letter-spacing: -0.5px; }
+  h2 { font-size: 22px; letter-spacing: -0.3px; }
+  h3 { font-size: 16px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent-dk); }
+  code, .mono { font-family: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace; }
+  .lede { color: var(--muted); font-size: 15px; }
+
+  /* Cover */
+  .cover {
+    display: flex; flex-direction: column; justify-content: center;
+    min-height: 86vh;
+  }
+  .brandbar { height: 8px; width: 84px; background: var(--accent); border-radius: 6px; margin-bottom: 30px; }
+  .cover h1 { font-size: 44px; max-width: 16ch; }
+  .cover .sub { font-size: 18px; color: var(--muted); margin-top: 6px; max-width: 60ch; }
+  .cover .meta { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 32px; max-width: 640px; }
+  .cover .meta div { border-top: 2px solid var(--line); padding-top: 10px; }
+  .cover .meta .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+  .cover .meta .v { font-size: 15px; color: var(--ink); margin-top: 2px; }
+  .tocnote { margin-top: 44px; color: var(--faint); font-size: 12px; }
+
+  /* Section chrome */
+  .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--accent-dk); font-weight: 700; margin-bottom: 6px; }
+  .rule { height: 1px; background: var(--line); border: 0; margin: 26px 0; }
+
+  /* Challenge card */
+  .challenge { break-before: page; page-break-before: always; padding-top: 8px; }
+  .challenge .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  .challenge .num { font-size: 12px; color: var(--faint); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+    background: var(--panel); color: var(--muted); border: 1px solid var(--line);
+  }
+  .badge.accent { background: var(--accent-soft); color: var(--accent-dk); border-color: #bfe3d9; }
+  .badge.time { background: var(--amber-soft); color: var(--amber); border-color: #f0dcb4; }
+
+  .context { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin: 16px 0; }
+  .context .label { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--faint); font-weight: 700; margin-bottom: 4px; }
+
+  .task { font-size: 15px; font-weight: 600; color: var(--ink); margin: 4px 0 18px; }
+
+  h4.blockhead { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-dk); margin: 22px 0 8px; }
+
+  ol.reqs { margin: 0 0 8px; padding-left: 20px; }
+  ol.reqs li { margin-bottom: 7px; }
+  ul.list { margin: 0 0 8px; padding-left: 20px; }
+  ul.list li { margin-bottom: 6px; }
+
+  .stretch { background: #fbfcfe; border: 1px dashed var(--line); border-radius: 8px; padding: 12px 16px; margin: 6px 0; }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-fg);
+    border-radius: 8px; padding: 14px 16px; overflow-x: auto;
+    font-size: 12px; line-height: 1.55; margin: 8px 0 14px;
+    font-family: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    break-inside: avoid;
+  }
+  pre.code .cm { color: #7f97b8; }
+  pre.code .kw { color: #78d3ff; }
+  pre.code .ty { color: #6ee7b7; }
+  pre.code .st { color: #ffcf8b; }
+
+  .eval { background: var(--accent-soft); border: 1px solid #bfe3d9; border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
+  .eval .label { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--accent-dk); font-weight: 700; margin-bottom: 3px; }
+
+  figure.wire { margin: 20px 0 6px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; break-inside: avoid; }
+  figure.wire svg { display: block; width: 100%; height: auto; }
+  figure.wire figcaption { font-size: 11.5px; color: var(--faint); padding: 8px 14px; border-top: 1px solid var(--line); background: var(--panel); }
+
+  /* Tables (playbook / matrix) */
+  table.grid { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 18px; }
+  table.grid th, table.grid td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.grid th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+  table.grid tr:last-child td { border-bottom: 0; }
+  table.grid td.c1 { font-weight: 600; white-space: nowrap; }
+
+  .rubric { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin: 12px 0; }
+  .rubric .item { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: #fff; }
+  .rubric .item h4 { margin: 0 0 4px; font-size: 13px; color: var(--accent-dk); }
+  .rubric .item p { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+  .callout { border: 1px solid #f0dcb4; background: var(--amber-soft); border-radius: 8px; padding: 12px 16px; color: #7a5410; font-size: 13px; margin: 14px 0; }
+
+  .qgroup { margin-bottom: 18px; }
+  .qgroup h3 { color: var(--accent-dk); margin-bottom: 6px; }
+  .footer-note { color: var(--faint); font-size: 11px; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; }
+  @media print { .page { padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<section class="page cover">
+  <div class="brandbar"></div>
+  <h1>Bondora Senior Front-End — Live Coding Challenge Pack</h1>
+  <div class="sub">Six focused, one-hour build exercises in Bondora's domain (Go&nbsp;&amp;&nbsp;Grow, portfolios, loans), phrased the way a live interview would hand them to you — plus a delivery playbook, a rubric, and verbal-question prep.</div>
+
+  <div class="meta">
+    <div><div class="k">Role</div><div class="v">Senior Front-End Engineer</div></div>
+    <div><div class="k">Interview shape</div><div class="v">~90 min · verbal discussion + live coding</div></div>
+    <div><div class="k">Stack</div><div class="v">React + TypeScript preferred · CSS · plain JS OK</div></div>
+    <div><div class="k">Per-challenge budget</div><div class="v">~40–60 min · working &gt; pretty</div></div>
+    <div><div class="k">AI policy</div><div class="v">Allowed for coding; you must explain every line. Not for verbal/conceptual answers.</div></div>
+    <div><div class="k">Golden rule</div><div class="v">Think aloud. Ship something that runs.</div></div>
+  </div>
+
+  <div class="tocnote">Contents — Live-coding playbook &amp; rubric · Challenges 1–6 (each with requirements, data shapes, stretch goals &amp; a wireframe) · Skills coverage matrix · Verbal / open-ended question bank.</div>
+</section>
+
+<!-- ===================== PLAYBOOK ===================== -->
+<section class="page challenge">
+  <div class="kicker">Before you start · read once</div>
+  <h2>The live-coding playbook</h2>
+  <p class="lede">These are the same six things Bondora's brief says interviewers watch for. Treat them as your operating procedure for every challenge below.</p>
+
+  <h4 class="blockhead">A repeatable 60-minute rhythm</h4>
+  <table class="grid">
+    <tr><th>Minute</th><th>Do</th></tr>
+    <tr><td class="c1">0–5</td><td><b>Clarify &amp; scope aloud.</b> Restate the task, ask 2–3 clarifying questions, name what you'll cut if time runs short. State your data model.</td></tr>
+    <tr><td class="c1">5–15</td><td><b>Skeleton.</b> Component tree, types/interfaces, mock data or fetch stub, render the simplest possible version that shows on screen.</td></tr>
+    <tr><td class="c1">15–40</td><td><b>Core requirements.</b> Make the must-haves work end to end. Wire state, derive don't duplicate, handle loading/empty/error early.</td></tr>
+    <tr><td class="c1">40–50</td><td><b>Harden.</b> Validation, edge cases, keys, cleanup (timers/requests), a11y basics. Verify it actually runs.</td></tr>
+    <tr><td class="c1">50–60</td><td><b>Polish + present.</b> Light styling, then walk the interviewer through it: what works, trade-offs made, what you'd do next.</td></tr>
+  </table>
+
+  <h4 class="blockhead">What earns points (the rubric)</h4>
+  <div class="rubric">
+    <div class="item"><h4>Working functionality first</h4><p>A running, presentable slice beats a half-built ambitious version. Cut scope out loud rather than freezing.</p></div>
+    <div class="item"><h4>Narration &amp; trade-offs</h4><p>Explain choices as you go — why this state shape, why memoize here, what you'd change with more time.</p></div>
+    <div class="item"><h4>State discipline</h4><p>Single source of truth, derived state via <code>useMemo</code> (never duplicated into <code>useState</code>), immutable updates, stable keys.</p></div>
+    <div class="item"><h4>Robustness</h4><p>Loading / empty / error states, input validation, no console errors, cleaned-up effects (no leaks).</p></div>
+    <div class="item"><h4>TypeScript fluency</h4><p>Meaningful types on data and props; no <code>any</code> escape hatches unless justified aloud.</p></div>
+    <div class="item"><h4>Presentable UI</h4><p>Readable layout, sensible spacing, formatted money/percent. Doesn't need to be beautiful — needs to look finished.</p></div>
+  </div>
+
+  <div class="callout"><b>Recurring traps to pre-empt:</b> duplicating derived data into state · missing <code>useEffect</code> cleanup (intervals, listeners, in-flight fetches) · index-as-key on reorderable lists · stale-closure bugs in async handlers · unformatted currency · forgetting the empty state.</div>
+</section>
+
+<!-- ===================== CHALLENGE 1 ===================== -->
+<section class="page challenge">
+  <div class="head">
+    <div>
+      <div class="num">Challenge 1 of 6</div>
+      <h2>Investment Transaction Dashboard</h2>
+    </div>
+  </div>
+  <div class="badges">
+    <span class="badge accent">Archetype · Data list / dashboard</span>
+    <span class="badge time">⏱ 45–55 min</span>
+    <span class="badge">Derived state · useMemo · keys</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    You're building a screen for Bondora's investor portal. Investors want to review the cash-flow on their account — interest received, principal repayments, new investments and Go&nbsp;&amp;&nbsp;Grow top-ups/withdrawals. The backend returns a flat list of transactions; turn it into a scannable dashboard.
+  </div>
+
+  <div class="task">Build a Transactions view: a table with search, type/status filters, sortable columns and pagination, plus summary tiles that reflect the <i>currently filtered</i> data.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li>Render transactions in a table: <b>Date, Type, Description, Amount</b> (colour-coded +/−), <b>Status</b>.</li>
+    <li>A <b>search box</b> filtering by description (case-insensitive).</li>
+    <li>A <b>Type</b> filter (All / Interest / Principal / Investment / Go&nbsp;&amp;&nbsp;Grow) and a <b>Status</b> filter (All / Completed / Pending).</li>
+    <li><b>Sortable</b> by Date and Amount — click header to toggle asc/desc.</li>
+    <li>Client-side <b>pagination</b> (10 rows/page) with prev/next and a page indicator.</li>
+    <li>Three <b>summary tiles</b> — Total In, Total Out, Net — computed from the <b>filtered</b> set, not the whole list.</li>
+    <li>Handle <b>loading</b>, <b>empty</b> ("no transactions match") and <b>error</b> states.</li>
+  </ol>
+
+  <h4 class="blockhead">Provided data</h4>
+  <p style="margin:0 0 6px;color:var(--muted)">A stub <code>fetchTransactions(): Promise&lt;Transaction[]&gt;</code> that resolves after ~600&nbsp;ms.</p>
+  <pre class="code"><span class="kw">type</span> <span class="ty">TxType</span>   = <span class="st">'interest'</span> | <span class="st">'principal'</span> | <span class="st">'investment'</span> | <span class="st">'go_grow'</span>;
+<span class="kw">type</span> <span class="ty">TxStatus</span> = <span class="st">'completed'</span> | <span class="st">'pending'</span>;
+
+<span class="kw">interface</span> <span class="ty">Transaction</span> {
+  id: <span class="ty">string</span>;
+  date: <span class="ty">string</span>;         <span class="cm">// ISO date</span>
+  type: <span class="ty">TxType</span>;
+  description: <span class="ty">string</span>;
+  amount: <span class="ty">number</span>;       <span class="cm">// EUR · positive = inflow, negative = outflow</span>
+  status: <span class="ty">TxStatus</span>;
+}</pre>
+
+  <h4 class="blockhead">Stretch goals (if time remains)</h4>
+  <div class="stretch"><b>A · Live updates.</b> Poll a <code>fetchLatestValue()</code> every 10&nbsp;s to refresh a "current portfolio value" tile — <code>useEffect</code> + <code>setInterval</code> with cleanup on unmount, and <code>AbortController</code> for the fetch. <i>(Tests memory-leak awareness.)</i></div>
+  <div class="stretch"><b>B · Infinite scroll.</b> Replace pagination with load-more using <code>IntersectionObserver</code>.</div>
+
+  <figure class="wire">
+    <!--WIRE:1:investment-dashboard-->
+    <svg viewBox="0 0 860 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="470" fill="#ffffff"/>
+      <text x="32" y="42" font-size="18" font-weight="700" fill="#14203a">Transactions</text>
+      <!-- summary tiles -->
+      <g>
+        <rect x="32" y="60" width="252" height="72" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="48" y="86" font-size="11" fill="#8b98ad">TOTAL IN</text>
+        <text x="48" y="112" font-size="20" font-weight="700" fill="#0a8b6f">€ 12,480</text>
+        <rect x="304" y="60" width="252" height="72" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="320" y="86" font-size="11" fill="#8b98ad">TOTAL OUT</text>
+        <text x="320" y="112" font-size="20" font-weight="700" fill="#b4433a">€ 6,050</text>
+        <rect x="576" y="60" width="252" height="72" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="592" y="86" font-size="11" fill="#8b98ad">NET</text>
+        <text x="592" y="112" font-size="20" font-weight="700" fill="#14203a">€ 6,430</text>
+      </g>
+      <!-- toolbar -->
+      <rect x="32" y="150" width="360" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/>
+      <text x="46" y="172" font-size="12" fill="#8b98ad">🔍  Search description…</text>
+      <rect x="560" y="150" width="128" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/>
+      <text x="574" y="172" font-size="12" fill="#5a6b85">Type ▾</text>
+      <rect x="700" y="150" width="128" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/>
+      <text x="714" y="172" font-size="12" fill="#5a6b85">Status ▾</text>
+      <!-- table header -->
+      <rect x="32" y="200" width="796" height="34" rx="6" fill="#eef2f7"/>
+      <text x="48" y="222" font-size="11" font-weight="700" fill="#5a6b85">DATE ↓</text>
+      <text x="180" y="222" font-size="11" font-weight="700" fill="#5a6b85">TYPE</text>
+      <text x="320" y="222" font-size="11" font-weight="700" fill="#5a6b85">DESCRIPTION</text>
+      <text x="640" y="222" font-size="11" font-weight="700" fill="#5a6b85">AMOUNT</text>
+      <text x="760" y="222" font-size="11" font-weight="700" fill="#5a6b85">STATUS</text>
+      <!-- rows -->
+      <g fill="#c3cddb">
+        <rect x="48" y="250" width="88" height="8" rx="4"/><rect x="180" y="250" width="70" height="8" rx="4"/><rect x="320" y="250" width="220" height="8" rx="4"/><rect x="640" y="250" width="70" height="8" rx="4" fill="#8fd0c0"/><rect x="760" y="250" width="60" height="8" rx="4"/>
+        <rect x="48" y="284" width="88" height="8" rx="4"/><rect x="180" y="284" width="60" height="8" rx="4"/><rect x="320" y="284" width="260" height="8" rx="4"/><rect x="640" y="284" width="60" height="8" rx="4" fill="#e2a7a0"/><rect x="760" y="284" width="60" height="8" rx="4"/>
+        <rect x="48" y="318" width="88" height="8" rx="4"/><rect x="180" y="318" width="80" height="8" rx="4"/><rect x="320" y="318" width="180" height="8" rx="4"/><rect x="640" y="318" width="80" height="8" rx="4" fill="#8fd0c0"/><rect x="760" y="318" width="60" height="8" rx="4"/>
+        <rect x="48" y="352" width="88" height="8" rx="4"/><rect x="180" y="352" width="70" height="8" rx="4"/><rect x="320" y="352" width="230" height="8" rx="4"/><rect x="640" y="352" width="70" height="8" rx="4" fill="#8fd0c0"/><rect x="760" y="352" width="60" height="8" rx="4"/>
+        <rect x="48" y="386" width="88" height="8" rx="4"/><rect x="180" y="386" width="60" height="8" rx="4"/><rect x="320" y="386" width="200" height="8" rx="4"/><rect x="640" y="386" width="60" height="8" rx="4" fill="#e2a7a0"/><rect x="760" y="386" width="60" height="8" rx="4"/>
+      </g>
+      <line x1="32" y1="270" x2="828" y2="270" stroke="#eef2f7"/>
+      <line x1="32" y1="304" x2="828" y2="304" stroke="#eef2f7"/>
+      <line x1="32" y1="338" x2="828" y2="338" stroke="#eef2f7"/>
+      <line x1="32" y1="372" x2="828" y2="372" stroke="#eef2f7"/>
+      <!-- pagination -->
+      <text x="32" y="440" font-size="12" fill="#8b98ad">Showing 1–10 of 48</text>
+      <g>
+        <rect x="700" y="424" width="30" height="28" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="710" y="443" font-size="13" fill="#5a6b85">‹</text>
+        <rect x="736" y="424" width="30" height="28" rx="6" fill="#0a8b6f"/><text x="746" y="443" font-size="13" fill="#fff">1</text>
+        <rect x="772" y="424" width="30" height="28" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="782" y="443" font-size="13" fill="#5a6b85">2</text>
+        <rect x="808" y="424" width="20" height="28" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="814" y="443" font-size="13" fill="#5a6b85">›</text>
+      </g>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — summary tiles reflect the filtered set · toolbar (search + filters) · sortable table · pagination.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    Derived state (never duplicate <code>filtered</code>/<code>sorted</code> into <code>useState</code>) · a memoised filter → sort → paginate pipeline · stable list keys · clean loading/empty/error handling.
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE 2 ===================== -->
+<section class="page challenge">
+  <div class="num">Challenge 2 of 6</div>
+  <h2>Loan Repayment Calculator</h2>
+  <div class="badges">
+    <span class="badge accent">Archetype · Form → compute</span>
+    <span class="badge time">⏱ 40–50 min</span>
+    <span class="badge">Controlled inputs · formatting · derived array</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    Bondora borrowers want to understand what a loan will cost before applying. Build a calculator that takes the loan parameters and shows the monthly payment and a full repayment breakdown in real time as the user adjusts the inputs.
+  </div>
+
+  <div class="task">A controlled form with live calculation of an annuity (equal-installment) loan, plus an amortization schedule table.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li>Inputs: <b>Loan amount</b> (€500–€10,000), <b>Term</b> (6–60 months), <b>Annual interest rate</b> (%). Sliders and/or number inputs kept in sync.</li>
+    <li>Live-compute and display <b>Monthly payment</b>, <b>Total repayment</b>, <b>Total interest</b> — recalculate on every change.</li>
+    <li>Use the annuity formula (below). Handle <code>r = 0</code> (interest-free) as <code>P / n</code>.</li>
+    <li>Render the <b>amortization schedule</b>: per month → payment #, payment, interest portion, principal portion, remaining balance.</li>
+    <li>Format money as EUR (<code>€1,234.56</code>) and rates as <code>%</code>.</li>
+    <li><b>Validate</b> inputs: clamp to bounds, block negatives/NaN, show inline messages; never let bad input crash the calc.</li>
+  </ol>
+
+  <pre class="code"><span class="cm">// Monthly payment (annuity):  P = principal, r = APR/12/100, n = term in months</span>
+<span class="kw">const</span> M = r === 0
+  ? P / n
+  : (P * r) / (1 - Math.pow(1 + r, -n));</pre>
+
+  <h4 class="blockhead">Stretch goals</h4>
+  <div class="stretch"><b>A · Overpayment.</b> Add a monthly overpayment field; show how it shortens the term and cuts total interest.</div>
+  <div class="stretch"><b>B · Product presets.</b> Toggle between two products (e.g. "Standard 12%" / "Premium 9%").</div>
+
+  <figure class="wire">
+    <!--WIRE:2:loan-calculator-->
+    <svg viewBox="0 0 860 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="470" fill="#ffffff"/>
+      <text x="32" y="40" font-size="18" font-weight="700" fill="#14203a">Loan repayment calculator</text>
+      <!-- left: form -->
+      <rect x="32" y="58" width="380" height="230" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <!-- amount -->
+      <text x="52" y="90" font-size="12" fill="#5a6b85">Loan amount</text>
+      <text x="360" y="90" font-size="12" font-weight="700" fill="#14203a">€ 5,000</text>
+      <rect x="52" y="100" width="340" height="6" rx="3" fill="#dbe3ee"/>
+      <rect x="52" y="100" width="150" height="6" rx="3" fill="#0a8b6f"/>
+      <circle cx="202" cy="103" r="9" fill="#0a8b6f"/>
+      <!-- term -->
+      <text x="52" y="142" font-size="12" fill="#5a6b85">Term</text>
+      <text x="352" y="142" font-size="12" font-weight="700" fill="#14203a">24 months</text>
+      <rect x="52" y="152" width="340" height="6" rx="3" fill="#dbe3ee"/>
+      <rect x="52" y="152" width="120" height="6" rx="3" fill="#0a8b6f"/>
+      <circle cx="172" cy="155" r="9" fill="#0a8b6f"/>
+      <!-- rate -->
+      <text x="52" y="194" font-size="12" fill="#5a6b85">Annual interest rate</text>
+      <text x="368" y="194" font-size="12" font-weight="700" fill="#14203a">12 %</text>
+      <rect x="52" y="204" width="340" height="6" rx="3" fill="#dbe3ee"/>
+      <rect x="52" y="204" width="90" height="6" rx="3" fill="#0a8b6f"/>
+      <circle cx="142" cy="207" r="9" fill="#0a8b6f"/>
+      <!-- presets -->
+      <rect x="52" y="238" width="150" height="30" rx="6" fill="#0a8b6f"/><text x="72" y="258" font-size="12" fill="#fff">Standard 12%</text>
+      <rect x="214" y="238" width="150" height="30" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="234" y="258" font-size="12" fill="#5a6b85">Premium 9%</text>
+      <!-- right: results -->
+      <rect x="432" y="58" width="396" height="70" rx="10" fill="#e5f4f0" stroke="#bfe3d9"/>
+      <text x="452" y="86" font-size="12" fill="#076351">MONTHLY PAYMENT</text>
+      <text x="452" y="114" font-size="26" font-weight="800" fill="#076351">€ 235.37</text>
+      <rect x="432" y="140" width="192" height="66" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <text x="450" y="166" font-size="11" fill="#8b98ad">TOTAL REPAYMENT</text>
+      <text x="450" y="192" font-size="18" font-weight="700" fill="#14203a">€ 5,648.88</text>
+      <rect x="636" y="140" width="192" height="66" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <text x="654" y="166" font-size="11" fill="#8b98ad">TOTAL INTEREST</text>
+      <text x="654" y="192" font-size="18" font-weight="700" fill="#b7791f">€ 648.88</text>
+      <!-- schedule table -->
+      <text x="32" y="316" font-size="12" font-weight="700" fill="#5a6b85">Amortization schedule</text>
+      <rect x="32" y="326" width="796" height="30" rx="6" fill="#eef2f7"/>
+      <text x="48" y="345" font-size="10.5" font-weight="700" fill="#5a6b85">#</text>
+      <text x="120" y="345" font-size="10.5" font-weight="700" fill="#5a6b85">PAYMENT</text>
+      <text x="320" y="345" font-size="10.5" font-weight="700" fill="#5a6b85">INTEREST</text>
+      <text x="520" y="345" font-size="10.5" font-weight="700" fill="#5a6b85">PRINCIPAL</text>
+      <text x="700" y="345" font-size="10.5" font-weight="700" fill="#5a6b85">BALANCE</text>
+      <g fill="#c3cddb">
+        <rect x="48" y="372" width="18" height="8" rx="4"/><rect x="120" y="372" width="70" height="8" rx="4"/><rect x="320" y="372" width="60" height="8" rx="4"/><rect x="520" y="372" width="70" height="8" rx="4"/><rect x="700" y="372" width="80" height="8" rx="4"/>
+        <rect x="48" y="400" width="18" height="8" rx="4"/><rect x="120" y="400" width="70" height="8" rx="4"/><rect x="320" y="400" width="60" height="8" rx="4"/><rect x="520" y="400" width="70" height="8" rx="4"/><rect x="700" y="400" width="80" height="8" rx="4"/>
+        <rect x="48" y="428" width="18" height="8" rx="4"/><rect x="120" y="428" width="70" height="8" rx="4"/><rect x="320" y="428" width="60" height="8" rx="4"/><rect x="520" y="428" width="70" height="8" rx="4"/><rect x="700" y="428" width="80" height="8" rx="4"/>
+      </g>
+      <line x1="32" y1="388" x2="828" y2="388" stroke="#eef2f7"/>
+      <line x1="32" y1="416" x2="828" y2="416" stroke="#eef2f7"/>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — inputs (sliders) drive a live results panel · full amortization schedule below.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    Controlled inputs kept in sync · input validation/clamping · currency &amp; percent formatting · correctly building a derived array (schedule) · <code>useMemo</code> so the schedule isn't recomputed on unrelated renders · pure calc functions kept out of the component.
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE 3 ===================== -->
+<section class="page challenge">
+  <div class="num">Challenge 3 of 6</div>
+  <h2>Go &amp; Grow Allocation Planner</h2>
+  <div class="badges">
+    <span class="badge accent">Archetype · Dynamic form rows (array-in-state)</span>
+    <span class="badge time">⏱ 45–55 min</span>
+    <span class="badge">Immutable updates · cross-field validation</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    Go&nbsp;&amp;&nbsp;Grow is Bondora's simple savings-style product. An investor wants to split a monthly deposit across several named buckets (e.g. <i>Emergency fund</i>, <i>House deposit</i>, <i>Holiday</i>) and see each bucket's projected balance over time at the fixed Go&nbsp;&amp;&nbsp;Grow rate.
+  </div>
+
+  <div class="task">A form with a total monthly deposit and a dynamic list of allocation rows; each row takes a share of the deposit, and the app projects growth per bucket.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li>A <b>Monthly deposit</b> input plus a dynamic list of allocation rows — each with a <b>name</b> and a <b>percentage share</b>.</li>
+    <li><b>Add-row</b> and <b>remove-row</b> controls; rows are held as an <b>array in state</b> and updated <b>immutably</b> (no mutation).</li>
+    <li><b>Cross-field validation:</b> shares must sum to 100%. Show a live running total and an error when it doesn't add up; block projection while invalid.</li>
+    <li>For a chosen horizon (12 / 24 / 36 months), <b>project</b> each bucket using the fixed Go&nbsp;&amp;&nbsp;Grow net rate (assume 6.75% p.a., compounded monthly) and show a per-bucket balance + grand total.</li>
+    <li>Sensible <b>empty state</b> and sensible defaults when adding a row.</li>
+  </ol>
+
+  <h4 class="blockhead">Stretch goals</h4>
+  <div class="stretch"><b>A · Persist.</b> Save the plan to <code>localStorage</code> and restore it on load.</div>
+  <div class="stretch"><b>B · Mini bars.</b> A tiny inline bar per bucket showing its share of the total.</div>
+
+  <figure class="wire">
+    <!--WIRE:3:go-grow-allocation-->
+    <svg viewBox="0 0 860 430" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="430" fill="#ffffff"/>
+      <text x="32" y="40" font-size="18" font-weight="700" fill="#14203a">Go &amp; Grow allocation planner</text>
+      <!-- deposit + horizon -->
+      <text x="32" y="74" font-size="12" fill="#5a6b85">Monthly deposit</text>
+      <rect x="32" y="82" width="180" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/>
+      <text x="46" y="104" font-size="13" font-weight="700" fill="#14203a">€ 300</text>
+      <text x="470" y="74" font-size="12" fill="#5a6b85">Horizon</text>
+      <rect x="470" y="82" width="70" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="494" y="104" font-size="12" fill="#5a6b85">12</text>
+      <rect x="548" y="82" width="70" height="34" rx="6" fill="#0a8b6f"/><text x="572" y="104" font-size="12" fill="#fff">24</text>
+      <rect x="626" y="82" width="70" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="650" y="104" font-size="12" fill="#5a6b85">36</text>
+      <!-- rows header -->
+      <text x="32" y="150" font-size="11" font-weight="700" fill="#8b98ad">ALLOCATION</text>
+      <text x="330" y="150" font-size="11" font-weight="700" fill="#8b98ad">SHARE</text>
+      <text x="470" y="150" font-size="11" font-weight="700" fill="#8b98ad">PROJECTED (24m)</text>
+      <!-- row 1 -->
+      <rect x="32" y="160" width="280" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="46" y="182" font-size="12" fill="#14203a">Emergency fund</text>
+      <rect x="330" y="160" width="90" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="344" y="182" font-size="12" fill="#14203a">50 %</text>
+      <text x="470" y="182" font-size="13" font-weight="700" fill="#0a8b6f">€ 3,842</text>
+      <text x="800" y="182" font-size="15" fill="#b4433a">✕</text>
+      <!-- row 2 -->
+      <rect x="32" y="202" width="280" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="46" y="224" font-size="12" fill="#14203a">House deposit</text>
+      <rect x="330" y="202" width="90" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="344" y="224" font-size="12" fill="#14203a">30 %</text>
+      <text x="470" y="224" font-size="13" font-weight="700" fill="#0a8b6f">€ 2,305</text>
+      <text x="800" y="224" font-size="15" fill="#b4433a">✕</text>
+      <!-- row 3 -->
+      <rect x="32" y="244" width="280" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="46" y="266" font-size="12" fill="#14203a">Holiday</text>
+      <rect x="330" y="244" width="90" height="34" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="344" y="266" font-size="12" fill="#14203a">20 %</text>
+      <text x="470" y="266" font-size="13" font-weight="700" fill="#0a8b6f">€ 1,537</text>
+      <text x="800" y="266" font-size="15" fill="#b4433a">✕</text>
+      <!-- add row -->
+      <rect x="32" y="290" width="170" height="32" rx="6" fill="#e5f4f0" stroke="#bfe3d9"/><text x="50" y="311" font-size="12" font-weight="700" fill="#076351">+ Add allocation</text>
+      <!-- running total -->
+      <rect x="330" y="290" width="366" height="32" rx="6" fill="#e5f4f0" stroke="#bfe3d9"/>
+      <text x="344" y="311" font-size="12" fill="#076351">Total share</text>
+      <text x="640" y="311" font-size="12" font-weight="700" fill="#076351">100 % ✓</text>
+      <!-- grand total -->
+      <rect x="32" y="338" width="664" height="60" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <text x="52" y="364" font-size="11" fill="#8b98ad">PROJECTED GRAND TOTAL · 24 MONTHS</text>
+      <text x="52" y="388" font-size="20" font-weight="800" fill="#14203a">€ 7,684</text>
+      <text x="540" y="388" font-size="12" fill="#8b98ad">deposited € 7,200 · growth € 484</text>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — deposit + horizon toggle · dynamic allocation rows with add/remove · live running total (must hit 100%) · projected grand total.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    Array-in-form state · immutable add / edit / remove · cross-field validation (the 100% sum rule) · derived projections kept in a pure function · sensible defaults &amp; empty state.
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE 4 ===================== -->
+<section class="page challenge">
+  <div class="num">Challenge 4 of 6</div>
+  <h2>Async Loan Search Autocomplete</h2>
+  <div class="badges">
+    <span class="badge accent">Archetype · Build-a-component / async</span>
+    <span class="badge time">⏱ 45–55 min</span>
+    <span class="badge">Debounce · race conditions · a11y · cleanup</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    On Bondora's secondary market, investors search for loans by country/originator. Build a reusable autocomplete input <b>from scratch</b> — no combobox library — that queries as the user types and shows a keyboard-navigable dropdown.
+  </div>
+
+  <div class="task">A debounced async autocomplete with a fully accessible, keyboard-navigable suggestion list that survives out-of-order responses.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li>As the user types, <b>debounce</b> (~300&nbsp;ms) then call <code>searchLoans(query)</code>. Don't fetch on an empty query.</li>
+    <li>Show a dropdown of suggestions; click or Enter <b>selects</b> and fills the input.</li>
+    <li><b>Keyboard nav:</b> ↑/↓ move the highlight, Enter selects, Esc closes; highlighted item scrolls into view.</li>
+    <li><b>Race conditions:</b> if a newer request resolves before an older one, ignore the stale response (<code>AbortController</code> or a request-id guard).</li>
+    <li><b>Loading</b> indicator while fetching; <b>"No results"</b> empty state.</li>
+    <li>Close on <b>outside click / blur</b>; manage focus correctly.</li>
+    <li>Basic <b>ARIA:</b> <code>role="combobox"/"listbox"/"option"</code>, <code>aria-expanded</code>, <code>aria-activedescendant</code>.</li>
+  </ol>
+
+  <h4 class="blockhead">Provided</h4>
+  <pre class="code"><span class="cm">// Resolves after a random 200–800ms delay, so stale responses are LIKELY.</span>
+<span class="kw">function</span> searchLoans(q: <span class="ty">string</span>): <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span>; label: <span class="ty">string</span> }[]&gt;</pre>
+
+  <h4 class="blockhead">Stretch goals</h4>
+  <div class="stretch"><b>A · Cache</b> results per query. &nbsp; <b>B · Highlight</b> the matching substring in each suggestion.</div>
+
+  <figure class="wire">
+    <!--WIRE:4:autocomplete-->
+    <svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="400" fill="#ffffff"/>
+      <text x="32" y="40" font-size="18" font-weight="700" fill="#14203a">Find loans</text>
+      <!-- input -->
+      <rect x="32" y="62" width="480" height="42" rx="8" fill="#ffffff" stroke="#0a8b6f" stroke-width="1.5"/>
+      <text x="48" y="88" font-size="14" fill="#14203a">esto</text><rect x="90" y="74" width="1.5" height="18" fill="#0a8b6f"/>
+      <!-- spinner -->
+      <circle cx="486" cy="83" r="8" fill="none" stroke="#dbe3ee" stroke-width="3"/>
+      <path d="M486 75 a8 8 0 0 1 8 8" fill="none" stroke="#0a8b6f" stroke-width="3"/>
+      <!-- dropdown -->
+      <rect x="32" y="110" width="480" height="196" rx="8" fill="#ffffff" stroke="#cfd8e3"/>
+      <!-- option highlighted -->
+      <rect x="36" y="114" width="472" height="44" rx="6" fill="#e5f4f0"/>
+      <text x="52" y="141" font-size="13" fill="#14203a"><tspan font-weight="800" fill="#076351">Esto</tspan>nia · Business loans</text>
+      <text x="52" y="189" font-size="13" fill="#14203a"><tspan font-weight="800" fill="#076351">Esto</tspan>nia · Consumer loans</text>
+      <text x="52" y="237" font-size="13" fill="#14203a"><tspan font-weight="800" fill="#076351">Esto</tspan>nia · Real-estate</text>
+      <text x="52" y="285" font-size="13" fill="#14203a"><tspan font-weight="800" fill="#076351">Esto</tspan>nian Kroon (legacy)</text>
+      <line x1="36" y1="206" x2="508" y2="206" stroke="#eef2f7"/>
+      <line x1="36" y1="254" x2="508" y2="254" stroke="#eef2f7"/>
+      <!-- annotations -->
+      <g fill="#8b98ad" font-size="12">
+        <rect x="560" y="62" width="268" height="42" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="576" y="79">debounced 300ms · aria-expanded=true</text>
+        <text x="576" y="97">stale responses discarded (AbortController)</text>
+        <rect x="560" y="120" width="268" height="60" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="576" y="142" fill="#5a6b85" font-weight="700">Keyboard</text>
+        <text x="576" y="160">↑ / ↓ move · Enter select</text>
+        <text x="576" y="176">Esc close · click-outside closes</text>
+        <rect x="560" y="196" width="268" height="44" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+        <text x="576" y="214" fill="#5a6b85" font-weight="700">role=listbox</text>
+        <text x="576" y="230">highlighted = aria-activedescendant</text>
+      </g>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — single input with inline spinner · open listbox with the active option highlighted &amp; matched substring bolded · behaviour annotations.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    Debounce · race-condition handling (the headline test) · focus &amp; keyboard management · ARIA roles · effect cleanup — timers and in-flight requests cancelled on unmount, no leaks.
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE 5 ===================== -->
+<section class="page challenge">
+  <div class="num">Challenge 5 of 6</div>
+  <h2>Portfolio Watchlist Manager</h2>
+  <div class="badges">
+    <span class="badge accent">Archetype · CRUD collection</span>
+    <span class="badge time">⏱ 45–55 min</span>
+    <span class="badge">Full state loop · immutable · persistence</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    Investors keep a personal watchlist of holdings they're tracking. Build a manager where they can add a holding, edit it inline, remove it, and have the list persist across reloads. This is the one challenge about <b>mutation</b> — the full create/read/update/delete loop.
+  </div>
+
+  <div class="task">A full add / edit / remove CRUD list backed by <code>localStorage</code>, with an add form and inline editing.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li><b>Add</b> a holding via a small form: name, amount invested (€), expected annual return (%).</li>
+    <li>Render holdings in a table with a <b>computed column</b> (projected 1-year return in €).</li>
+    <li><b>Inline edit</b> a row (edit-in-place with save/cancel) and <b>remove</b> a row (with confirm).</li>
+    <li>All updates <b>immutable</b>; every item has a <b>stable id</b>.</li>
+    <li><b>Persist</b> to <code>localStorage</code>; restore on mount. Handle the empty state.</li>
+    <li>A <b>totals row</b>: total invested and total projected return across all holdings.</li>
+  </ol>
+
+  <h4 class="blockhead">Stretch goals</h4>
+  <div class="stretch"><b>A · Optimistic UI.</b> Simulate an async <code>saveHolding()</code> that sometimes rejects — update immediately, roll back on failure with an error message.</div>
+  <div class="stretch"><b>B · Sort</b> by any column.</div>
+
+  <figure class="wire">
+    <!--WIRE:5:watchlist-crud-->
+    <svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="420" fill="#ffffff"/>
+      <text x="32" y="40" font-size="18" font-weight="700" fill="#14203a">My watchlist</text>
+      <!-- add form row -->
+      <rect x="32" y="56" width="796" height="52" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <rect x="48" y="69" width="300" height="26" rx="5" fill="#ffffff" stroke="#cfd8e3"/><text x="60" y="86" font-size="11" fill="#8b98ad">Holding name</text>
+      <rect x="360" y="69" width="150" height="26" rx="5" fill="#ffffff" stroke="#cfd8e3"/><text x="372" y="86" font-size="11" fill="#8b98ad">Amount €</text>
+      <rect x="522" y="69" width="150" height="26" rx="5" fill="#ffffff" stroke="#cfd8e3"/><text x="534" y="86" font-size="11" fill="#8b98ad">Return %</text>
+      <rect x="700" y="69" width="112" height="26" rx="5" fill="#0a8b6f"/><text x="742" y="86" font-size="12" fill="#fff">+ Add</text>
+      <!-- table header -->
+      <rect x="32" y="122" width="796" height="30" rx="6" fill="#eef2f7"/>
+      <text x="48" y="141" font-size="10.5" font-weight="700" fill="#5a6b85">NAME</text>
+      <text x="330" y="141" font-size="10.5" font-weight="700" fill="#5a6b85">INVESTED</text>
+      <text x="470" y="141" font-size="10.5" font-weight="700" fill="#5a6b85">RETURN %</text>
+      <text x="600" y="141" font-size="10.5" font-weight="700" fill="#5a6b85">PROJECTED</text>
+      <text x="740" y="141" font-size="10.5" font-weight="700" fill="#5a6b85">ACTIONS</text>
+      <!-- normal row -->
+      <text x="48" y="180" font-size="13" fill="#14203a">Estonia Business</text>
+      <text x="330" y="180" font-size="13" fill="#14203a">€ 2,000</text>
+      <text x="470" y="180" font-size="13" fill="#14203a">10.5 %</text>
+      <text x="600" y="180" font-size="13" font-weight="700" fill="#0a8b6f">€ 210</text>
+      <text x="740" y="180" font-size="12" fill="#076351">Edit</text><text x="784" y="180" font-size="12" fill="#b4433a">Delete</text>
+      <line x1="32" y1="196" x2="828" y2="196" stroke="#eef2f7"/>
+      <!-- row in EDIT mode -->
+      <rect x="32" y="200" width="796" height="42" rx="6" fill="#e5f4f0"/>
+      <rect x="44" y="209" width="270" height="24" rx="5" fill="#ffffff" stroke="#0a8b6f"/><text x="56" y="225" font-size="12" fill="#14203a">Finland Consumer</text>
+      <rect x="326" y="209" width="120" height="24" rx="5" fill="#ffffff" stroke="#0a8b6f"/><text x="338" y="225" font-size="12" fill="#14203a">1,500</text>
+      <rect x="466" y="209" width="110" height="24" rx="5" fill="#ffffff" stroke="#0a8b6f"/><text x="478" y="225" font-size="12" fill="#14203a">9.0</text>
+      <text x="600" y="225" font-size="13" fill="#8b98ad">€ 135</text>
+      <rect x="712" y="209" width="50" height="24" rx="5" fill="#0a8b6f"/><text x="722" y="225" font-size="11" fill="#fff">Save</text>
+      <rect x="770" y="209" width="52" height="24" rx="5" fill="#ffffff" stroke="#cfd8e3"/><text x="778" y="225" font-size="11" fill="#5a6b85">Cancel</text>
+      <!-- another row -->
+      <text x="48" y="272" font-size="13" fill="#14203a">Spain Real-estate</text>
+      <text x="330" y="272" font-size="13" fill="#14203a">€ 3,200</text>
+      <text x="470" y="272" font-size="13" fill="#14203a">8.0 %</text>
+      <text x="600" y="272" font-size="13" font-weight="700" fill="#0a8b6f">€ 256</text>
+      <text x="740" y="272" font-size="12" fill="#076351">Edit</text><text x="784" y="272" font-size="12" fill="#b4433a">Delete</text>
+      <line x1="32" y1="288" x2="828" y2="288" stroke="#eef2f7"/>
+      <!-- totals -->
+      <rect x="32" y="300" width="796" height="46" rx="8" fill="#f5f7fb" stroke="#d7deea"/>
+      <text x="48" y="329" font-size="13" font-weight="700" fill="#14203a">Totals</text>
+      <text x="330" y="329" font-size="13" font-weight="700" fill="#14203a">€ 6,700</text>
+      <text x="600" y="329" font-size="13" font-weight="700" fill="#0a8b6f">€ 601</text>
+      <!-- persistence note -->
+      <text x="32" y="378" font-size="12" fill="#8b98ad">Saved to localStorage · restored on reload</text>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — add form · table with computed "projected" column · one row shown in inline-edit mode · totals row · persisted to localStorage.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    The full create/read/update/delete loop · form + list working together · immutable updates · id/key discipline · persistence &amp; restore · (stretch) optimistic update with rollback.
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE 6 ===================== -->
+<section class="page challenge">
+  <div class="num">Challenge 6 of 6</div>
+  <h2>Loan Application Wizard</h2>
+  <div class="badges">
+    <span class="badge accent">Archetype · Multi-step form / wizard</span>
+    <span class="badge time">⏱ 50–60 min</span>
+    <span class="badge">State across steps · per-step validation · submit lifecycle</span>
+  </div>
+
+  <div class="context">
+    <div class="label">Context</div>
+    Applying for a Bondora loan is a multi-step flow — very common in fintech / KYC. Build a 3-step wizard that collects the application, validates each step, lets the user move back and forth without losing data, and submits at the end.
+  </div>
+
+  <div class="task">A guided wizard — <b>Step 1 Loan details → Step 2 Personal / KYC → Step 3 Review &amp; submit</b> — with per-step validation, a progress indicator and a submit lifecycle.</div>
+
+  <h4 class="blockhead">Core requirements</h4>
+  <ol class="reqs">
+    <li><b>Step 1 — Loan details:</b> amount, term, purpose (select). <b>Step 2 — Personal:</b> full name, email, monthly income, country. <b>Step 3 — Review:</b> read-only summary + Submit.</li>
+    <li><b>Per-step validation:</b> Next is blocked until the current step is valid; inline field errors (email format, required, numeric ranges).</li>
+    <li>State is carried <b>across steps</b> — going Back and returning keeps entered values.</li>
+    <li>A <b>progress indicator</b> (stepper / "Step X of 3") reflecting current position and completed steps.</li>
+    <li>On submit call <code>submitApplication(data): Promise&lt;{ id: string }&gt;</code> — show <b>loading</b>, then a <b>success</b> screen with a reference id, or an <b>error</b> state with retry.</li>
+  </ol>
+
+  <h4 class="blockhead">Stretch goals</h4>
+  <div class="stretch"><b>A · Persist</b> wizard state to <code>sessionStorage</code> so a mid-flow refresh doesn't lose data. &nbsp; <b>B · Deep-link</b> steps via URL/hash.</div>
+
+  <figure class="wire">
+    <!--WIRE:6:loan-wizard-->
+    <svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+      <rect x="0" y="0" width="860" height="400" fill="#ffffff"/>
+      <text x="32" y="38" font-size="18" font-weight="700" fill="#14203a">Apply for a loan</text>
+      <!-- stepper -->
+      <g>
+        <circle cx="80" cy="76" r="16" fill="#0a8b6f"/><text x="75" y="81" font-size="13" fill="#fff">✓</text>
+        <text x="60" y="112" font-size="11" fill="#5a6b85">Loan details</text>
+        <line x1="96" y1="76" x2="200" y2="76" stroke="#0a8b6f" stroke-width="3"/>
+        <circle cx="216" cy="76" r="16" fill="#0a8b6f"/><text x="211" y="81" font-size="13" fill="#fff">2</text>
+        <text x="188" y="112" font-size="11" font-weight="700" fill="#076351">Personal</text>
+        <line x1="232" y1="76" x2="336" y2="76" stroke="#dbe3ee" stroke-width="3"/>
+        <circle cx="352" cy="76" r="16" fill="#ffffff" stroke="#cfd8e3" stroke-width="2"/><text x="347" y="81" font-size="13" fill="#8b98ad">3</text>
+        <text x="330" y="112" font-size="11" fill="#8b98ad">Review</text>
+      </g>
+      <text x="700" y="80" font-size="12" fill="#8b98ad">Step 2 of 3</text>
+      <!-- form card -->
+      <rect x="32" y="132" width="500" height="196" rx="10" fill="#f5f7fb" stroke="#d7deea"/>
+      <text x="52" y="162" font-size="12" fill="#5a6b85">Full name</text>
+      <rect x="52" y="170" width="460" height="30" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="64" y="190" font-size="12" fill="#14203a">Mustafa …</text>
+      <text x="52" y="224" font-size="12" fill="#5a6b85">Email</text>
+      <rect x="52" y="232" width="220" height="30" rx="6" fill="#ffffff" stroke="#b4433a"/><text x="64" y="252" font-size="12" fill="#14203a">bad@</text>
+      <text x="284" y="252" font-size="11" fill="#b4433a">Enter a valid email</text>
+      <text x="52" y="286" font-size="12" fill="#5a6b85">Monthly income</text>
+      <rect x="52" y="294" width="220" height="30" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="64" y="314" font-size="12" fill="#14203a">€ 2,400</text>
+      <text x="300" y="286" font-size="12" fill="#5a6b85">Country</text>
+      <rect x="300" y="294" width="212" height="30" rx="6" fill="#ffffff" stroke="#cfd8e3"/><text x="312" y="314" font-size="12" fill="#14203a">Estonia ▾</text>
+      <!-- nav buttons -->
+      <rect x="32" y="348" width="90" height="36" rx="8" fill="#ffffff" stroke="#cfd8e3"/><text x="60" y="371" font-size="13" fill="#5a6b85">‹ Back</text>
+      <rect x="442" y="348" width="90" height="36" rx="8" fill="#0a8b6f"/><text x="466" y="371" font-size="13" fill="#fff">Next ›</text>
+      <!-- success inset -->
+      <rect x="560" y="132" width="268" height="196" rx="10" fill="#e5f4f0" stroke="#bfe3d9"/>
+      <text x="576" y="158" font-size="11" font-weight="700" fill="#076351">ON SUBMIT →</text>
+      <circle cx="694" cy="212" r="30" fill="#0a8b6f"/><text x="681" y="221" font-size="26" fill="#fff">✓</text>
+      <text x="616" y="268" font-size="14" font-weight="700" fill="#076351">Application received</text>
+      <text x="628" y="290" font-size="12" fill="#076351">Reference #BND-90427</text>
+      <text x="600" y="312" font-size="11" fill="#5a6b85">loading → success · or error + retry</text>
+    </svg>
+    <!--/WIRE-->
+    <figcaption>Wireframe — stepper showing completed / active / upcoming steps · current step form with an inline validation error · Back/Next gating · success screen on submit.</figcaption>
+  </figure>
+
+  <div class="eval">
+    <div class="label">What's being evaluated</div>
+    One source of truth for form state across steps · per-step validation gating navigation · progress UI · the submit → loading → success/error lifecycle · validation logic kept separate/testable.
+  </div>
+</section>
+
+<!-- ===================== SKILLS MATRIX ===================== -->
+<section class="page challenge">
+  <div class="kicker">Reference</div>
+  <h2>Skills coverage matrix</h2>
+  <p class="lede">Every topic in Bondora's brief maps to at least one challenge. Rehearse across the set and you've touched the whole surface.</p>
+  <table class="grid">
+    <tr><th>Topic from the brief</th><th>Practised in</th></tr>
+    <tr><td class="c1">Derived state / no duplication</td><td>1 Dashboard · 2 Calculator · 3 Allocation</td></tr>
+    <tr><td class="c1">useMemo / useCallback</td><td>1 Dashboard (filter→sort→paginate) · 2 Calculator (schedule)</td></tr>
+    <tr><td class="c1">Controlled forms &amp; validation</td><td>2 Calculator · 3 Allocation · 5 Watchlist · 6 Wizard</td></tr>
+    <tr><td class="c1">Immutable state updates</td><td>3 Allocation · 5 Watchlist</td></tr>
+    <tr><td class="c1">Full CRUD / mutation loop</td><td>5 Watchlist</td></tr>
+    <tr><td class="c1">Async, promises &amp; race conditions</td><td>4 Autocomplete · 1 Dashboard (stretch) · 5 (optimistic)</td></tr>
+    <tr><td class="c1">Debounce</td><td>4 Autocomplete · 1 Dashboard (search)</td></tr>
+    <tr><td class="c1">Effect cleanup / memory leaks</td><td>4 Autocomplete · 1 Dashboard (polling stretch)</td></tr>
+    <tr><td class="c1">Event delegation / keyboard &amp; focus</td><td>4 Autocomplete</td></tr>
+    <tr><td class="c1">Accessibility (ARIA, roles)</td><td>4 Autocomplete · 6 Wizard</td></tr>
+    <tr><td class="c1">Loading / empty / error states</td><td>1 Dashboard · 4 Autocomplete · 5 Watchlist · 6 Wizard</td></tr>
+    <tr><td class="c1">List keys &amp; rendering</td><td>1 Dashboard · 3 Allocation · 5 Watchlist</td></tr>
+    <tr><td class="c1">Persistence (local/sessionStorage)</td><td>3 Allocation (stretch) · 5 Watchlist · 6 Wizard (stretch)</td></tr>
+    <tr><td class="c1">Currency / percent formatting</td><td>2 Calculator · 3 Allocation · 5 Watchlist</td></tr>
+    <tr><td class="c1">TypeScript modelling</td><td>All six</td></tr>
+  </table>
+  <div class="callout"><b>Practice order suggestion:</b> 2 → 1 → 5 → 4 → 6 → 3. Start with the calculator (pure, self-contained), build to the dashboard (derived-state workhorse), then the CRUD/async/wizard trio, and finish on the allocation planner which blends several skills at once.</div>
+</section>
+
+<!-- ===================== VERBAL BANK ===================== -->
+<section class="page challenge">
+  <div class="kicker">The other half of the interview</div>
+  <h2>Verbal / open-ended question bank</h2>
+  <p class="lede">AI can't help you here — these are spoken. Have a crisp answer and, where possible, a concrete story from your own work.</p>
+
+  <div class="qgroup">
+    <h3>React internals &amp; rendering</h3>
+    <ul class="list">
+      <li>Explain the Virtual DOM and reconciliation. How does React decide what to re-render?</li>
+      <li>What are keys for, and what goes wrong with index-as-key? When is index-as-key actually fine?</li>
+      <li>What causes a component to re-render? How do <code>React.memo</code>, <code>useMemo</code> and <code>useCallback</code> differ and when is each worth it (and not)?</li>
+      <li>Functional vs class components — when would you still reach for a class (legacy codebases, error boundaries)?</li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>Performance &amp; memory</h3>
+    <ul class="list">
+      <li>How do you prevent memory leaks in React? (effect cleanup, intervals/listeners, aborting fetches, stale closures.)</li>
+      <li>Lazy loading &amp; Suspense — what problem do they solve and how do you code-split?</li>
+      <li>How would you diagnose and fix a slow list / janky re-render in production?</li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>JavaScript fundamentals</h3>
+    <ul class="list">
+      <li>Promises vs async/await; how do you run things in parallel vs sequence; error handling.</li>
+      <li>Event delegation — what is it, why use it, how does bubbling make it work?</li>
+      <li>DOM behaviour: event loop, microtasks vs macrotasks, why a <code>setTimeout(…, 0)</code> runs after a resolved promise.</li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>State management &amp; architecture</h3>
+    <ul class="list">
+      <li>Local vs global state — how do you decide? When does Context API bite you (re-render fan-out)?</li>
+      <li>Redux vs Zustand vs Context — trade-offs and when you'd pick each.</li>
+      <li>CSS/styling approaches in React (CSS Modules, CSS-in-JS, Tailwind, plain CSS) — pros/cons and your preference.</li>
+      <li>Compare React with another framework you've used and when you'd choose each.</li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>Experience &amp; fit (have a story ready)</h3>
+    <ul class="list">
+      <li>A technical decision you made, the trade-offs, and how it turned out.</li>
+      <li>A difficult front-end problem you solved and a performance improvement you drove (with rough numbers).</li>
+      <li>Your openness to legacy work — plain JS / jQuery, CMS-related work, and small back-end changes in .NET / Java / PHP. <i>(Bondora asks this directly; answer honestly and positively.)</i></li>
+    </ul>
+  </div>
+
+  <div class="footer-note">Bondora Senior Front-End — Live Coding Challenge Pack · Built from the official interview brief + personal prep notes · Practise each under a real one-hour timer, out loud.</div>
+</section>
+
+</body>
+</html>
