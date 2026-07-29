@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import "./App.css";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -70,6 +71,12 @@ function filterAndSortTransactions(
 
     return sort.direction === "asc" ? comparison : -comparison;
   });
+}
+
+function amountClassName(amount: number) {
+  if (amount > 0) return "amount-positive";
+  if (amount < 0) return "amount-negative";
+  return "";
 }
 
 function summarizeTransactions(transactions: readonly Transaction[]) {
@@ -201,10 +208,16 @@ function App() {
     <main>
       <h1>Transactions</h1>
 
-      <section aria-label="Filtered transaction summary">
-        <h2>Total in: {currencyFormatter.format(totals.totalIn)}</h2>
-        <h2>Total out: {currencyFormatter.format(totals.totalOut)}</h2>
-        <h2>Net total: {currencyFormatter.format(totals.netTotal)}</h2>
+      <section className="summary" aria-label="Filtered transaction summary">
+        <h2 className="amount-positive">
+          Total in: {currencyFormatter.format(totals.totalIn)}
+        </h2>
+        <h2 className="amount-negative">
+          Total out: {currencyFormatter.format(totals.totalOut)}
+        </h2>
+        <h2 className="amount-net">
+          Net total: {currencyFormatter.format(totals.netTotal)}
+        </h2>
       </section>
 
       <section aria-label="Transaction filters">
@@ -261,55 +274,59 @@ function App() {
         </label>
       </section>
 
-      <table>
-        <caption>Transactions matching the selected filters</caption>
-        <thead>
-          <tr>
-            <th scope="col" aria-sort={ariaSort("date")}>
-              <button type="button" onClick={() => toggleSort("date")}>
-                Date {sort.key === "date" && (sort.direction === "asc" ? "↑" : "↓")}
-              </button>
-            </th>
-            <th scope="col">Type</th>
-            <th scope="col">Description</th>
-            <th scope="col" aria-sort={ariaSort("amount")}>
-              <button type="button" onClick={() => toggleSort("amount")}>
-                Amount{" "}
-                {sort.key === "amount" &&
-                  (sort.direction === "asc" ? "↑" : "↓")}
-              </button>
-            </th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.length === 0 ? (
+      <div className="transactions-block">
+        <table>
+          <caption>Transactions matching the selected filters</caption>
+          <thead>
             <tr>
-              <td colSpan={5}>No transactions match your filters.</td>
+              <th scope="col" aria-sort={ariaSort("date")}>
+                <button type="button" onClick={() => toggleSort("date")}>
+                  Date {sort.key === "date" && (sort.direction === "asc" ? "↑" : "↓")}
+                </button>
+              </th>
+              <th scope="col">Type</th>
+              <th scope="col">Description</th>
+              <th scope="col" aria-sort={ariaSort("amount")}>
+                <button type="button" onClick={() => toggleSort("amount")}>
+                  Amount{" "}
+                  {sort.key === "amount" &&
+                    (sort.direction === "asc" ? "↑" : "↓")}
+                </button>
+              </th>
+              <th scope="col">Status</th>
             </tr>
-          ) : (
-            paginatedData.map((transaction) => (
-              <tr key={transaction.id}>
-                <td>
-                  <time dateTime={transaction.date}>{transaction.date}</time>
-                </td>
-                <td>{TYPE_LABELS[transaction.type]}</td>
-                <td>{transaction.description}</td>
-                <td>{currencyFormatter.format(transaction.amount)}</td>
-                <td>{STATUS_LABELS[transaction.status]}</td>
+          </thead>
+          <tbody>
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={5}>No transactions match your filters.</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              paginatedData.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>
+                    <time dateTime={transaction.date}>{transaction.date}</time>
+                  </td>
+                  <td>{TYPE_LABELS[transaction.type]}</td>
+                  <td>{transaction.description}</td>
+                  <td className={amountClassName(transaction.amount)}>
+                    {currencyFormatter.format(transaction.amount)}
+                  </td>
+                  <td>{STATUS_LABELS[transaction.status]}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
-      {pageCount > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          pageCount={pageCount}
-          onPageChange={setCurrentPage}
-        />
-      )}
+        {pageCount > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            pageCount={pageCount}
+            onPageChange={setCurrentPage}
+          />
+        )}
+      </div>
     </main>
   );
 }

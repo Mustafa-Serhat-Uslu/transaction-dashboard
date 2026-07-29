@@ -1,0 +1,60 @@
+main{
+  border: 1px solid #ccc;
+  border-radius: 12px;
+    padding: 16px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: center;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.summary h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.amount-positive {
+  color: #16a34a;
+}
+
+.amount-negative {
+  color: #dc2626;
+}
+
+.amount-net {
+  color: #000;
+}
+
+.transactions-block {
+  overflow: hidden;
+}
+
+.transactions-block table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-block th,
+.transactions-block td {
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.transactions-block thead th {
+  background: #e5e5e5;
+}
+
+.transactions-block nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+}
