@@ -1,35 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTransactions } from "./api/transactions";
+import {
+  STATUS_LABELS,
+  TYPE_LABELS,
+  type Transaction,
+  type TransactionStatus,
+  type TransactionType,
+} from "./types/transaction";
 import "./App.css";
 
 const ITEMS_PER_PAGE = 10;
 
-// Keep labels and their TypeScript unions backed by one source of truth.
-const TYPE_LABELS = {
-  interest: "Interest",
-  principal: "Principal",
-  investment: "Investment",
-  go_grow: "Go & Grow",
-} as const;
-
-const STATUS_LABELS = {
-  completed: "Completed",
-  pending: "Pending",
-} as const;
-
-type TransactionType = keyof typeof TYPE_LABELS;
-type TransactionStatus = keyof typeof STATUS_LABELS;
 type Filter<T extends string> = T | "all";
 type SortKey = "date" | "amount";
 type SortDirection = "asc" | "desc";
-
-type Transaction = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: TransactionType;
-  status: TransactionStatus;
-};
 
 type Sort = {
   key: SortKey;
@@ -93,9 +78,14 @@ function summarizeTransactions(transactions: readonly Transaction[]) {
 }
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Transaction[]>([]);
+  const {
+    data = [],
+    isLoading,
+    error,
+  } = useQuery<Transaction[], Error>({
+    queryKey: ["transactions"],
+    queryFn: ({ signal }) => fetchTransactions(signal),
+  });
   const [typeFilter, setTypeFilter] =
     useState<Filter<TransactionType>>("all");
   const [statusFilter, setStatusFilter] =
@@ -106,43 +96,6 @@ function App() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    async function fetchData() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch("/transactions.json", {
-          signal: abortController.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const transactions: Transaction[] = await response.json();
-        setData(transactions);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-
-        console.error("Error fetching data:", error);
-        setError(
-          error instanceof Error
-            ? error
-            : new Error("Unable to load transactions"),
-        );
-      } finally {
-        // Avoid stale loading updates when Strict Mode aborts the first request.
-        if (!abortController.signal.aborted) setIsLoading(false);
-      }
-    }
-
-    void fetchData();
-    return () => abortController.abort();
-  }, []);
 
   const filteredAndSorted = useMemo(
     () =>
